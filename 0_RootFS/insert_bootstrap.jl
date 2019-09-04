@@ -34,3 +34,6 @@ for gcc_version in ("4.8.5", "5.2.0", "6.1.0", "7.1.0", "8.1.0")
     end
 end
 
+# LLVM as well
+build_tarballs("LLVMBootstrap")
+

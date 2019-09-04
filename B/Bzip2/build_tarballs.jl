@@ -19,8 +19,8 @@ sed -i 's/sys\\stat\.h/sys\/stat\.h/g' bzip2.c
 # Override stubborn makevars
 CFLAGS="-Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64 -fPIC"
 OBJS="blocksort.o huffman.o crctable.o randtable.o compress.o decompress.o bzlib.o"
-make CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" -j${nproc} ${OBJS}
-make CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" PREFIX=${prefix} install
+make CFLAGS="${CFLAGS}" -j${nproc} ${OBJS}
+make CFLAGS="${CFLAGS}" PREFIX=${prefix} install
 
 # Build dynamic library
 if [[ "${target}" == *-darwin* ]]; then
@@ -65,8 +65,8 @@ EOF
 platforms = supported_platforms()
 
 # The products that we will ensure are always built
-products = prefix -> [
-    LibraryProduct(prefix,"libbz2", :libbzip2),
+products = [
+    LibraryProduct("libbz2", :libbzip2),
 ]
 
 # Dependencies that must be installed before this package can be built

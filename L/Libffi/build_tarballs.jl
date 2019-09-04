@@ -12,7 +12,9 @@ sources = [
 # Bash recipe for building across all platforms
 script = raw"""
 cd $WORKSPACE/srcdir/libffi-*/
-./configure --prefix=$prefix --host=$target
+update_configure_scripts
+autoreconf -f -i
+./configure --prefix=$prefix --host=$target --disable-static --enable-shared
 make -j${nproc}
 make install
 """
@@ -22,8 +24,8 @@ make install
 platforms = supported_platforms()
 
 # The products that we will ensure are always built
-products(prefix) = [
-    LibraryProduct(prefix, "libffi", :libffi)
+products = [
+    LibraryProduct("libffi", :libffi)
 ]
 
 # Dependencies that must be installed before this package can be built
