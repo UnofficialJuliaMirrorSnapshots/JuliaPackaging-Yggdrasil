@@ -19,7 +19,7 @@ apk add yasm
 mkdir build
 cd build
 
-cmake .. -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain
+cmake .. -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TARGET_TOOLCHAIN}"
 make -j${nproc}
 make install
 """
@@ -29,12 +29,12 @@ make install
 platforms = supported_platforms()
 
 # The products that we will ensure are always built
-products = prefix -> [
-    LibraryProduct(prefix, "libjpeg", :libjpeg),
-    LibraryProduct(prefix, "libturbojpeg", :libturbojpeg),
-    ExecutableProduct(prefix, "cjpeg", :cjpeg),
-    ExecutableProduct(prefix, "djpeg", :djpeg),
-    ExecutableProduct(prefix, "jpegtran", :jpegtran),
+products = [
+    LibraryProduct("libjpeg", :libjpeg),
+    LibraryProduct("libturbojpeg", :libturbojpeg),
+    ExecutableProduct("cjpeg", :cjpeg),
+    ExecutableProduct("djpeg", :djpeg),
+    ExecutableProduct("jpegtran", :jpegtran),
 ]
 
 # Dependencies that must be installed before this package can be built
