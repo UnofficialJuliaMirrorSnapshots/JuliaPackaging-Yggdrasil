@@ -2,21 +2,27 @@
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
 
-name = "FriBidi"
-version = v"1.0.5"
+name = "Graphene"
+version = v"1.10.0"
 
-# Collection of sources required to build FriBidi
+# Collection of sources required to build Graphene
 sources = [
-    "https://github.com/fribidi/fribidi.git" =>
-    "0f849e344d446934b4ecdbe9edc32abd29029731",
+    "https://github.com/ebassi/graphene/releases/download/$(version)/graphene-$(version).tar.xz" =>
+    "406d97f51dd4ca61e91f84666a00c3e976d3e667cd248b76d92fdb35ce876499"
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/fribidi/
+cd $WORKSPACE/srcdir/graphene-*/
 mkdir build && cd build
 
-meson .. -Ddocs=false --cross-file="${MESON_TARGET_TOOLCHAIN}"
+meson .. \
+    -Dgtk_doc=false \
+    -Dgobject_types=true \
+    -Dintrospection=false \
+    -Dtests=false \
+    -Dinstalled_tests=false \
+    --cross-file="${MESON_TARGET_TOOLCHAIN}"
 ninja -j${nproc}
 ninja install
 """
@@ -26,13 +32,13 @@ ninja install
 platforms = supported_platforms()
 
 # The products that we will ensure are always built
-products = [
-    LibraryProduct("libfribidi", :libfribidi),
-    ExecutableProduct("fribidi", :fribidi)
+products = Product[
+    LibraryProduct(["libgraphene-1", "libgraphene-1.0"], :libgraphene),
 ]
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
+    "Glib_jll",
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.

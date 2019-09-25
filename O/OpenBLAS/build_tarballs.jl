@@ -2,10 +2,10 @@ using BinaryBuilder
 
 # Collection of sources required to build OpenBLAS
 name = "OpenBLAS"
-version = v"0.3.5"
+version = v"0.3.7"
 sources = [
     "https://github.com/xianyi/OpenBLAS/archive/v$(version).tar.gz" =>
-    "0950c14bd77c90a6427e26210d6dab422271bc86f9fc69126725833ecdaa0e85",
+    "bde136122cef3dd6efe2de1c6f65c10955bbb0cc01a520c2342f5287c28f9379",
     "./bundled",
 ]
 
@@ -15,7 +15,7 @@ script = raw"""
 flags=(USE_THREAD=1 GEMM_MULTITHREADING_THRESHOLD=50 NO_AFFINITY=1)
 
 # We are cross-compiling
-flags+=(CROSS=1 "HOSTCC=$CC_FOR_BUILD" PREFIX=/ "CROSS_SUFFIX=${target}-")
+flags+=(CROSS=1 PREFIX=/ "CROSS_SUFFIX=${target}-")
 
 # We need to use our basic objconv, not a prefixed one:
 flags+=(OBJCONV=objconv)
@@ -73,12 +73,6 @@ fi
 # Enter the fun zone
 cd ${WORKSPACE}/srcdir/OpenBLAS-*/
 
-# Apply SkylakeX patch (https://github.com/JuliaLang/julia/pull/30661)
-atomic_patch -p1 ${WORKSPACE}/srcdir/patches/openblas-skylakexdgemm.patch
-
-# Apply `sgemm_kernel_direct undefined` patch
-atomic_patch -p1 ${WORKSPACE}/srcdir/patches/openblas-avx512_sgemm.patch
-
 # Build the actual library
 make "${flags[@]}"
 
@@ -118,8 +112,8 @@ platforms = supported_platforms()
 platforms = expand_gcc_versions(platforms)
 
 # The products that we will ensure are always built
-products(prefix) = [
-    LibraryProduct(prefix, ["libopenblas", "libopenblas64_"], :libopenblas)
+products = [
+    LibraryProduct(["libopenblas", "libopenblas64_"], :libopenblas)
 ]
 
 # Dependencies that must be installed before this package can be built
@@ -127,4 +121,4 @@ dependencies = [
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.
-build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies)
+build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies; preferred_gcc_version=v"6")
