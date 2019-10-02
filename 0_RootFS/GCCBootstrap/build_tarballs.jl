@@ -255,6 +255,18 @@ if [[ "${COMPILER_TARGET}" == *-musl* ]]; then
     export libat_cv_have_ifunc=no
     export ac_cv_have_decl__builtin_ffs=yes
 
+    musl_arch()
+    {
+        case "${COMPILER_TARGET}" in
+            i686*)
+                echo i386 ;;
+            arm*)
+                echo armhf ;;
+            *)
+                echo ${COMPILER_TARGET%%-*} ;;
+        esac
+    }
+
 elif [[ "${COMPILER_TARGET}" == *-mingw* ]]; then
     # On mingw, we need to explicitly set the windres code page to 1, otherwise windres segfaults
     export CPPFLAGS="${CPPFLAGS} -DCP_ACP=1"
@@ -315,7 +327,7 @@ if [[ ${COMPILER_TARGET} == *-darwin* ]]; then
     make -j${nproc} VERBOSE=1
     make install
 
-    # Install cctools, make sure it links against musl, not glibc!
+    # Install cctools
     mkdir -p ${WORKSPACE}/srcdir/cctools_build
     cd ${WORKSPACE}/srcdir/cctools_build
     CC=/usr/bin/clang CXX=/usr/bin/clang++ LDFLAGS=-L/usr/lib ${WORKSPACE}/srcdir/cctools-port/cctools/configure \
@@ -457,7 +469,7 @@ elif [[ ${COMPILER_TARGET} == *-musl* ]]; then
     # Configure musl
     mkdir -p ${WORKSPACE}/srcdir/musl_build
     cd ${WORKSPACE}/srcdir/musl_build
-    ${WORKSPACE}/srcdir/musl-*/configure \
+    LDFLAGS="-Wl,-soname,libc.musl-$(musl_arch).so.1" ${WORKSPACE}/srcdir/musl-*/configure \
         --prefix=/usr \
         --host=${COMPILER_TARGET} \
         --with-headers="${sysroot}/usr/include" \
@@ -473,9 +485,9 @@ elif [[ ${COMPILER_TARGET} == *-musl* ]]; then
     
     # Make CRT
     make lib/{crt1,crti,crtn}.o
-    mkdir -p ${sysroot}/usr/lib64
-    install lib/crt1.o lib/crti.o lib/crtn.o ${sysroot}/usr/${LIB64}
-    ${COMPILER_TARGET}-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o ${sysroot}/usr/${LIB64}/libc.so
+    mkdir -p ${sysroot}/usr/lib
+    install lib/crt1.o lib/crti.o lib/crtn.o ${sysroot}/usr/lib
+    ${COMPILER_TARGET}-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o ${sysroot}/usr/lib/libc.so
 
 elif [[ ${COMPILER_TARGET} == *-mingw* ]]; then
     # Build CRT
@@ -544,7 +556,7 @@ elif [[ ${COMPILER_TARGET} == *-musl* ]]; then
     cd ${WORKSPACE}/srcdir/musl_build
     rm -rf *
 
-    ${WORKSPACE}/srcdir/musl-*/configure \
+    LDFLAGS="-Wl,-soname,libc.musl-$(musl_arch).so.1" ${WORKSPACE}/srcdir/musl-*/configure \
         --prefix=/usr \
         --host=${COMPILER_TARGET} \
         --with-headers="${sysroot}/usr/include" \
@@ -554,10 +566,13 @@ elif [[ ${COMPILER_TARGET} == *-musl* ]]; then
         --enable-optimize \
         --enable-debug \
         CROSS_COMPILE="${COMPILER_TARGET}-"
-    
-    make -j${nproc}
-    rm -f ${sysroot}/usr/${LIB64}/libc.so
+
+    make -j${nproc} DESTDIR=${sysroot}
+    rm -f ${sysroot}/usr/lib/libc.so
     make install DESTDIR=${sysroot}
+
+    # Fix broken symlink
+    ln -fsv ../usr/lib/libc.so ${sysroot}/lib/ld-musl-$(musl_arch).so.1
 
 elif [[ ${COMPILER_TARGET} == *-mingw* ]]; then    
     cd $WORKSPACE/srcdir/mingw_crt_build
