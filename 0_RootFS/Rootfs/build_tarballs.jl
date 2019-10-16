@@ -2,7 +2,7 @@ using Pkg, BinaryBuilder, SHA, Dates
 if !isdefined(Pkg, :Artifacts)
     error("This must be run with Julia 1.3+!")
 end
-using Pkg.Artifacts, Pkg.PlatformEngines, Pkg.BinaryPlatforms
+using Pkg.Artifacts, Pkg.PlatformEngines
 
 include("../common.jl")
 
@@ -206,6 +206,9 @@ cp -vdR ${WORKSPACE}/srcdir/testsuite ${prefix}/usr/share/
 ## Cleanup
 # We can never extract these files, because they are too fancy  :(
 rm -rf ${prefix}/usr/share/terminfo
+
+# This causes a case insensitivity error; good thing it's empty
+rm -rf ${prefix}/usr/share/perl5/core_perl/pod
 
 # Cleanup .pyc/.pyo files as they're not redistributable
 find ${prefix}/usr -type f -name "*.py[co]" -delete -or -type d -name "__pycache__" -delete
