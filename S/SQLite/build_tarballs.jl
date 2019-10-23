@@ -2,22 +2,18 @@
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
 
-name = "adwaita_icon_theme"
-version = v"3.33.92"
+name = "SQLite"
+version = v"3.30.1"
 
-# Collection of sources required to build adwaita-icon-theme
+# Collection of sources required to build SQLite
 sources = [
-    "https://gitlab.gnome.org/GNOME/adwaita-icon-theme/-/archive/$(version)/adwaita-icon-theme-$(version).tar.bz2" =>
-    "9e2078bf9e4d28f2a921fa88159733fe83a1fd37f8cbd768a5de3b83f44f0973"
+    "https://www.sqlite.org/2019/sqlite-autoconf-3300100.tar.gz" =>
+    "8c5a50db089bd2a1b08dbc5b00d2027602ca7ff238ba7658fabca454d4298e60",
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/adwaita-icon-theme-*/
-
-# Install native gtk+3.0 so that we get `gtk-encode-symbolic-svg`
-apk add gtk+3.0 librsvg
-./autogen.sh --prefix=$prefix --host=$target
+cd $WORKSPACE/srcdir/sqlite-autoconf-*/
 ./configure --prefix=$prefix --host=$target
 make -j${nproc}
 make install
@@ -28,13 +24,12 @@ make install
 platforms = supported_platforms()
 
 # The products that we will ensure are always built
-products = Product[
-    FileProduct("share/icons", :adwaita_icons_dir),
+products = [
+    LibraryProduct("libsqlite3", :libsqlite)
 ]
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
-    "hicolor_icon_theme_jll",
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.

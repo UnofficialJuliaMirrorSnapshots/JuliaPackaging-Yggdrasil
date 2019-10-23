@@ -2,24 +2,22 @@
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
 
-name = "Xorg_libX11"
-version = v"1.6.8"
+name = "Xorg_libXft"
+version = v"2.3.3"
 
-# Collection of sources required to build libX11
+# Collection of sources required to build libXft
 sources = [
-    "https://www.x.org/archive/individual/lib/libX11-$(version).tar.bz2" =>
-    "b289a845c189e251e0e884cc0f9269bbe97c238df3741e854ec4c17c21e473d5",
+    "https://www.x.org/archive/individual/lib/libXft-$(version).tar.bz2" =>
+    "225c68e616dd29dbb27809e45e9eadf18e4d74c50be43020ef20015274529216",
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/libX11-*/
+cd $WORKSPACE/srcdir/libXft-*/
 CPPFLAGS="-I${prefix}/include"
 # When compiling for things like ppc64le, we need newer `config.sub` files
 update_configure_scripts
 ./configure --prefix=${prefix} --host=${target} --enable-malloc0returnsnull=no
-# For some obscure reason, this Makefile may not get the value of CPPFLAGS
-sed -i "s?CPPFLAGS = ?CPPFLAGS = ${CPPFLAGS}?" src/util/Makefile
 make -j${nproc}
 make install
 """
@@ -29,19 +27,13 @@ make install
 platforms = [p for p in supported_platforms() if p isa Union{Linux,FreeBSD}]
 
 products = [
-    LibraryProduct("libX11", :libX11),
-    LibraryProduct("libX11-xcb", :libX11_xcb),
+    LibraryProduct("libXft", :libXft),
 ]
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
-    "Xorg_kbproto_jll",
-    "Xorg_libxcb_jll",
-    "Xorg_xproto_jll",
-    "Xorg_inputproto_jll",
-    "Xorg_xextproto_jll",
-    "Xorg_util_macros_jll",
-    "Xorg_xtrans_jll",
+    "Fontconfig_jll",
+    "Xorg_libXrender_jll",
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.

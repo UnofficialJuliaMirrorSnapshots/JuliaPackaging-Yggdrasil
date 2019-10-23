@@ -9,11 +9,23 @@ vecho_red() {
 	vecho "$@" >&2
 }
 
+# Quiet tools
+qfind() {
+    find "$@" 2>/dev/null
+}
+qwhich() {
+    which "$@" 2>/dev/null
+}
+
 # Save bash history (and optionally echo it out as it happens)
 save_history() {
+    # Skip special commands
+    if [[ "${BASH_COMMAND}" == trap* ]] || [[ "${BASH_COMMAND}" == false ]]; then
+        return
+    fi
 	vecho_red " ---> ${BASH_COMMAND}"
-	history -s "${BASH_COMMAND}"
-	history -a
+    history -s "${BASH_COMMAND}"
+    history -a
 }
 
 # Save our environment into `/meta/.env`, eliminating read-only variables
@@ -57,20 +69,3 @@ if [ -f /meta/.env ]; then
 	source /meta/.env
 fi
 
-# Quiet find
-qfind() {
-    find "$@" 2>/dev/null
-}
-
-# Function to install license files
-install_license () {
-    if [ $# -eq 0 ]; then
-        echo "Usage: install_license license_file1.txt [license_file2.md, license_file3.rtf, ...]" >&2
-        exit 1
-    fi
-    for file in "$@"; do
-        DEST="${prefix}/share/licenses/${SRC_NAME}/$(basename "${file}")"
-        echo "Installing license file \"$file\" to \"${DEST}\"..."
-        install -Dm644 "${file}" "${DEST}"
-    done
-}

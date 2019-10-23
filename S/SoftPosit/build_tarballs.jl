@@ -2,25 +2,22 @@
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
 
-name = "adwaita_icon_theme"
-version = v"3.33.92"
+name = "SoftPosit"
+version = v"0.4.1"
 
-# Collection of sources required to build adwaita-icon-theme
+# Collection of sources required to build SoftPosit
 sources = [
-    "https://gitlab.gnome.org/GNOME/adwaita-icon-theme/-/archive/$(version)/adwaita-icon-theme-$(version).tar.bz2" =>
-    "9e2078bf9e4d28f2a921fa88159733fe83a1fd37f8cbd768a5de3b83f44f0973"
+    "https://gitlab.com/cerlane/SoftPosit/-/archive/$version/SoftPosit-$version.tar.gz" =>
+    "13f7360c5b91ad3704f66537a754ba3748a764e1291eaa33940866ca37c7dbf5",
+    "./bundled"
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/adwaita-icon-theme-*/
-
-# Install native gtk+3.0 so that we get `gtk-encode-symbolic-svg`
-apk add gtk+3.0 librsvg
-./autogen.sh --prefix=$prefix --host=$target
-./configure --prefix=$prefix --host=$target
-make -j${nproc}
-make install
+cd $WORKSPACE/srcdir/SoftPosit-*/build/Linux-x86_64-GCC/
+atomic_patch -p1 "${WORKSPACE}/srcdir/patches/makefile.patch"
+make SLIB=".${dlext}" julia
+install -Dm755 "softposit.${dlext}" "${libdir}/softposit.${dlext}"
 """
 
 # These are the platforms we will build for by default, unless further
@@ -28,13 +25,12 @@ make install
 platforms = supported_platforms()
 
 # The products that we will ensure are always built
-products = Product[
-    FileProduct("share/icons", :adwaita_icons_dir),
+products = [
+    LibraryProduct("softposit", :softposit)
 ]
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
-    "hicolor_icon_theme_jll",
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.
