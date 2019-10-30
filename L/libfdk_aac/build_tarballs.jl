@@ -1,19 +1,21 @@
+# Note that this script can accept some limited command-line arguments, run
+# `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
 
-name = "Ogg"
-version = v"1.3.3"
+name = "libfdk_aac"
+version = v"0.1.6"
 
-# Collection of sources required to build Ogg
+# Collection of sources required to build libfdk
 sources = [
-    "https://downloads.xiph.org/releases/ogg/libogg-$(version).tar.gz" =>
-    "c2e8a485110b97550f453226ec644ebac6cb29d1caef2902c007edab4308d985",
+    "https://downloads.sourceforge.net/opencore-amr/fdk-aac-$(version).tar.gz" =>
+    "aab61b42ac6b5953e94924c73c194f08a86172d63d39c5717f526ca016bed3ad",
+
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/libogg-*/
-
-./configure --prefix=$prefix --host=${target}
+cd $WORKSPACE/srcdir/fdk-aac-*
+./configure --prefix=$prefix --host=$target
 make -j${nproc}
 make install
 """
@@ -24,7 +26,7 @@ platforms = supported_platforms()
 
 # The products that we will ensure are always built
 products = [
-    LibraryProduct("libogg", :libogg),
+    LibraryProduct("libfdk-aac", :libfdk)
 ]
 
 # Dependencies that must be installed before this package can be built

@@ -1,19 +1,19 @@
+# Note that this script can accept some limited command-line arguments, run
+# `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
+name = "libvorbis"
+version = v"1.3.6"
 
-name = "Ogg"
-version = v"1.3.3"
-
-# Collection of sources required to build Ogg
+# Collection of sources required to build libvorbis
 sources = [
-    "https://downloads.xiph.org/releases/ogg/libogg-$(version).tar.gz" =>
-    "c2e8a485110b97550f453226ec644ebac6cb29d1caef2902c007edab4308d985",
+    "https://downloads.xiph.org/releases/vorbis/libvorbis-$(version).tar.xz" =>
+    "af00bb5a784e7c9e69f56823de4637c350643deedaf333d0fa86ecdba6fcb415",
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/libogg-*/
-
-./configure --prefix=$prefix --host=${target}
+cd $WORKSPACE/srcdir/libvorbis-*
+./configure --prefix=$prefix --host=$target
 make -j${nproc}
 make install
 """
@@ -21,15 +21,16 @@ make install
 # These are the platforms we will build for by default, unless further
 # platforms are passed in on the command line
 platforms = supported_platforms()
-
 # The products that we will ensure are always built
 products = [
-    LibraryProduct("libogg", :libogg),
+    LibraryProduct("libvorbis", :libvorbis),
 ]
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
+    "Ogg_jll"
 ]
+
 
 # Build the tarballs, and possibly a `build.jl` as well.
 build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies)

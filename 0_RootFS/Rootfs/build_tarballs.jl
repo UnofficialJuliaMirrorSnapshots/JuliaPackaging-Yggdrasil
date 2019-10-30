@@ -126,7 +126,7 @@ mkdir ./dev/shm
 
 ## Install foundational packages within the chroot
 NET_TOOLS="curl wget git openssl ca-certificates"
-MISC_TOOLS="python sudo file libintl patchutils grep"
+MISC_TOOLS="python sudo file libintl patchutils grep zlib"
 FILE_TOOLS="tar zip unzip xz findutils squashfs-tools unrar rsync"
 INTERACTIVE_TOOLS="bash gdb vim nano tmux strace"
 BUILD_TOOLS="make patch gawk autoconf automake libtool bison flex pkgconfig cmake ninja ccache"
@@ -215,8 +215,9 @@ cp -vdR ${WORKSPACE}/srcdir/testsuite ${prefix}/usr/share/
 # We can never extract these files, because they are too fancy  :(
 rm -rf ${prefix}/usr/share/terminfo
 
-# This causes a case insensitivity error; good thing it's empty
+# These cause case sensitivity errors
 rm -rf ${prefix}/usr/share/perl5/core_perl/pod
+rm -rf ${prefix}/etc/vim/bundle/vim-colorschemes/colors/darkBlue.vim
 
 # Cleanup .pyc/.pyo files as they're not redistributable
 find ${prefix}/usr -type f -name "*.py[co]" -delete -or -type d -name "__pycache__" -delete
