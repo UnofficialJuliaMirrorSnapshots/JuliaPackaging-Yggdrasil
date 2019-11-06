@@ -19,6 +19,7 @@ TESTSUITE_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 # Calculate the relative path from $(TESTSUITE_DIR) to $(PROJECT_DIR)
 PROJECT_REL_DIR := $(call relpath,$(PROJECT_DIR),$(TESTSUITE_DIR))
 PROJECT_NAME := $(notdir $(PROJECT_DIR))
+PROJECT_LANG := $(notdir $(abspath $(dir $(PROJECT_DIR))))
 
 # Inherit some things from the environment, setting dumb defaults otherwise
 target ?= x86_64-linux-gnu
@@ -61,8 +62,18 @@ $(PROJECT_BUILD):
 	@mkdir -p $@
 $(PROJECT_BUILD)/$(PROJECT_NAME)$(exeext): | $(PROJECT_BUILD)
 
-# Create default rule for `build`
-build: $(PROJECT_BUILD)/$(PROJECT_NAME)
+# By default, `build` just tries to build all of our BINS and LIBS:
+build: $(addprefix $(PROJECT_BUILD)/,$(BINS)) $(addprefix $(PROJECT_BUILD)/,$(LIBS))
+
+# Create default rule for `install`
+install: build
+	@mkdir -p $(bindir) $(libdir)
+	@for f in $(BINS); do \
+		install -m755 $(PROJECT_BUILD)/$${f} $(bindir)/$${f}_$(PROJECT_LANG); \
+	done
+	@for f in $(LIBS); do \
+		install -m755 $(PROJECT_BUILD)/$${f} $(libdir); \
+	done
 
 # Create default rule for `clean`
 clean:

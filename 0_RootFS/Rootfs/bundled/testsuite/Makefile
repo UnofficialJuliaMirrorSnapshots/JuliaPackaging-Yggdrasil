@@ -2,12 +2,13 @@
 buildall:
 runall:
 cleanall:
+install:
 
 LANGUAGES=c cxx fortran go rust
 PROJECTS=hello_world dyn_link
 
 define unesc
-$(subst -,/,$(subst build-,,$(subst clean-,,$(subst run-,,$1))))
+$(subst -,/,$(subst install-,,$(subst build-,,$(subst clean-,,$(subst run-,,$1)))))
 endef
 
 # Helper function that adds $(2) as a dependency to rule $(1), but only if $(2) actually exists.
@@ -21,9 +22,13 @@ endef
 $(foreach p,$(PROJECTS),$(foreach l,$(LANGUAGES),$(eval $(call add_dep,buildall,build-$(l)-$(p)))))
 $(foreach p,$(PROJECTS),$(foreach l,$(LANGUAGES),$(eval $(call add_dep,cleanall,clean-$(l)-$(p)))))
 $(foreach p,$(PROJECTS),$(foreach l,$(LANGUAGES),$(eval $(call add_dep,runall,build-$(l)-$(p)))))
+$(foreach p,$(PROJECTS),$(foreach l,$(LANGUAGES),$(eval $(call add_dep,install,install-$(l)-$(p)))))
 
 build-%:
 	@$(MAKE) -sC $(call unesc,$@)
+
+install-%:
+	@$(MAKE) -sC $(call unesc,$@) install
 
 clean-%:
 	@$(MAKE) -sC $(call unesc,$@) clean
@@ -37,3 +42,4 @@ runall:
 			fi; \
 		done; \
 	done;
+
