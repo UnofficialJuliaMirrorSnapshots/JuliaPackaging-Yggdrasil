@@ -2,23 +2,21 @@
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
 
-name = "libfdk_aac"
-version = v"0.1.6"
+name = "libmodplug"
+version = v"0.8.9"
 
-# Collection of sources required to build libfdk
+# Collection of sources required to build libmodplug
 sources = [
-    "https://downloads.sourceforge.net/opencore-amr/fdk-aac-$(version).tar.gz" =>
-    "aab61b42ac6b5953e94924c73c194f08a86172d63d39c5717f526ca016bed3ad",
-
+    "https://downloads.sourceforge.net/modplug-xmms/libmodplug-$(version).0.tar.gz" =>
+    "457ca5a6c179656d66c01505c0d95fafaead4329b9dbaa0f997d00a3508ad9de",
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/fdk-aac-*
+cd $WORKSPACE/srcdir/libmodplug-*/
 ./configure --prefix=$prefix --host=$target
 make -j${nproc}
 make install
-install_license NOTICE
 """
 
 # These are the platforms we will build for by default, unless further
@@ -27,7 +25,7 @@ platforms = supported_platforms()
 
 # The products that we will ensure are always built
 products = [
-    LibraryProduct("libfdk-aac", :libfdk)
+    LibraryProduct("libmodplug", :libmodplug),
 ]
 
 # Dependencies that must be installed before this package can be built

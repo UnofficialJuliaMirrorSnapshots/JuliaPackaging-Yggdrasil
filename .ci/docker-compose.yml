@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+    agent:
+        build:
+            context: azure_agent
+        environment:
+            - AZP_URL=${AZP_URL}
+            - AZP_TOKEN=${AZP_TOKEN}
+            - AZP_POOL=${AZP_POOL}
+            - HOST_HOSTNAME=${HOSTNAME}
+            - GITHUB_TOKEN=${GITHUB_TOKEN}
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - yggdrasil_storage:/storage
+        restart: unless-stopped
+        privileged: true
+volumes:
+    yggdrasil_storage:

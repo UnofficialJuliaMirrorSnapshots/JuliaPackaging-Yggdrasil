@@ -2,23 +2,21 @@
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder
 
-name = "libfdk_aac"
-version = v"0.1.6"
+name = "mpg123"
+version = v"1.25.12"
 
-# Collection of sources required to build libfdk
+# Collection of sources required to build mpg123
 sources = [
-    "https://downloads.sourceforge.net/opencore-amr/fdk-aac-$(version).tar.gz" =>
-    "aab61b42ac6b5953e94924c73c194f08a86172d63d39c5717f526ca016bed3ad",
-
+    "https://downloads.sourceforge.net/sourceforge/mpg123/mpg123-$(version).tar.bz2" =>
+    "1ffec7c9683dfb86ea9040d6a53d6ea819ecdda215df347f79def08f1fe731d1",
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/fdk-aac-*
-./configure --prefix=$prefix --host=$target
+cd $WORKSPACE/srcdir/mpg123-*/
+./configure --prefix=$prefix --host=$target --enable-int-quality
 make -j${nproc}
 make install
-install_license NOTICE
 """
 
 # These are the platforms we will build for by default, unless further
@@ -27,7 +25,12 @@ platforms = supported_platforms()
 
 # The products that we will ensure are always built
 products = [
-    LibraryProduct("libfdk-aac", :libfdk)
+    LibraryProduct("libmpg123", :libmpg123),
+    LibraryProduct("libout123", :libout123),
+    ExecutableProduct("mpg123", :mpg123),
+    ExecutableProduct("mpg123-id3dump", :mpg123_id3dump),
+    ExecutableProduct("mpg123-strip", :mpg123_strip),
+    ExecutableProduct("out123", :out123),
 ]
 
 # Dependencies that must be installed before this package can be built

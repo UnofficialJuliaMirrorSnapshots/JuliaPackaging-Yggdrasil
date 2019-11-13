@@ -24,11 +24,13 @@ platforms = supported_platforms()
 # The products that we will ensure are always built
 products = [
     LibraryProduct("libvorbis", :libvorbis),
+    LibraryProduct("libvorbisenc", :libvorbisenc),
+    LibraryProduct("libvorbisfile", :libvorbisfile),
 ]
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
-    "Ogg_jll"
+    "Ogg_jll",
 ]
 
 
